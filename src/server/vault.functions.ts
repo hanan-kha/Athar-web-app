@@ -1,0 +1,12 @@
+type Archive = { id: string; title: string; description: string | null; status: "draft" | "pending" | "approved" | "rejected"; created_at: string; };
+const _archives: Archive[] = [];
+export const verifyVaultPin = async ({ data }: { data: { pin: string } }) => data.pin === "123456" ? { outcome: "success" as const, attemptsLeft: 3 } : { outcome: "wrong" as const, attemptsLeft: 2 };
+export const listArchives = async () => ({ archives: _archives });
+export const createArchiveRecord = async ({ data }: { data: { title: string; description?: string; submit: boolean } }) => { _archives.unshift({ id: `arc-${Date.now()}`, title: data.title, description: data.description ?? null, status: data.submit ? "pending" : "draft", created_at: new Date().toISOString() }); return { ok: true }; };
+export const deleteArchiveRecord = async ({ data }: { data: { id: string } }) => { const i = _archives.findIndex(a => a.id === data.id); if (i !== -1) _archives.splice(i, 1); return { ok: true }; };
+export const getArchiveRecord = async ({ data }: { data: { id: string } }) => ({ record: _archives.find(a => a.id === data.id) ?? null });
+export const getArchiveRecordWithFiles = async ({ data }: { data: { id: string } }) => ({ record: _archives.find(a => a.id === data.id) ?? null, docs: [], images: [] });
+export const deleteArchiveFile = async () => ({ ok: true });
+export const addFilesToArchive = async () => ({ ok: true });
+export const updateArchiveRecord = async ({ data }: { data: { id: string; title: string; description?: string; submit?: boolean } }) => { const a = _archives.find(x => x.id === data.id); if (a) { a.title = data.title; a.description = data.description ?? null; if (data.submit) a.status = "pending"; } return { ok: true }; };
+export const createArchiveWithFiles = async ({ data }: { data: { title: string; description?: string; submit: boolean; files?: unknown[] } }) => { const id = `arc-${Date.now()}`; _archives.unshift({ id, title: data.title, description: data.description ?? null, status: data.submit ? "pending" : "draft", created_at: new Date().toISOString() }); return { ok: true, id }; };
